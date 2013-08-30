@@ -3,7 +3,7 @@ import Keys._
 import Tests._
 import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
-
+import com.typesafe.sbt.SbtStartScript
 
 object G2Server extends Build {
   val gdataVersion = "1.47.1"
@@ -74,7 +74,8 @@ object G2Server extends Build {
     base = file("."),
     settings = Project.defaultSettings ++
       sharedSettings ++
-      Unidoc.settings 
+      Unidoc.settings ++
+      SbtStartScript.startScriptForClassesSettings
   ).settings(
     name := "g2-scala-server",
     autoScalaLibrary := false,
