@@ -4,19 +4,12 @@ import Tests._
 import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 import com.typesafe.sbt.SbtStartScript
+import com.twitter.scrooge.ScroogeSBT
 
 object G2Server extends Build {
   val gdataVersion = "1.47.1"
 
   def gdata(which: String) = "com.google.gdata.gdata-java-client" % ("gdata-" + which + "-2.0") % gdataVersion
-
-  lazy val resolve = resolveTask
-  def resolveTask = task {
-    updateIvyModule.withModule { (i, m, c) =>
-      i.resolve(m, new org.apache.ivy.core.resolve.ResolveOptions)
-    }
-    None
-  }
 
   val sharedSettings = Seq(
     version := "0.0.1",
@@ -81,6 +74,7 @@ object G2Server extends Build {
     settings = Project.defaultSettings ++
       sharedSettings ++
       Unidoc.settings ++
+      ScroogeSBT.newSettings ++
       SbtStartScript.startScriptForClassesSettings).settings(
       name := "g2-scala-server",
       autoScalaLibrary := false,
