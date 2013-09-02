@@ -7,26 +7,33 @@ import com.typesafe.sbt.SbtStartScript
 
 object G2Server extends Build {
   val gdataVersion = "1.47.1"
-   
-  def gdata(which: String) = "com.google.gdata.gdata-java-client" % ("gdata-"+which+"-2.0") % gdataVersion
-  
+
+  def gdata(which: String) = "com.google.gdata.gdata-java-client" % ("gdata-" + which + "-2.0") % gdataVersion
+
+  lazy val resolve = resolveTask
+  def resolveTask = task {
+    updateIvyModule.withModule { (i, m, c) =>
+      i.resolve(m, new org.apache.ivy.core.resolve.ResolveOptions)
+    }
+    None
+  }
+
   val sharedSettings = Seq(
     version := "0.0.1",
     organization := "com.g2",
     crossScalaVersions := Seq("2.9.2"),
 
     libraryDependencies ++= Seq(
-      "com.g2" %% "g2-finagle-server" % "0.0.1" % "compile",
+      "com.g2" %% "g2-finagle-server" % "0.0.1" exclude ("org.slf4j", "slf4j-jdk14"),
       "junit" % "junit" % "4.8.1" % "test",
-      "org.mockito" % "mockito-all" % "1.8.5" % "test"
-    ),
+      "org.mockito" % "mockito-all" % "1.8.5" % "test"),
     resolvers += "burtsev-net-maven" at "http://maven.burtsev.net",
 
     ivyXML :=
       <dependencies>
-        <exclude org="com.sun.jmx" module="jmxri" />
-        <exclude org="com.sun.jdmk" module="jmxtools" />
-        <exclude org="javax.jms" module="jms" />
+        <exclude org="com.sun.jmx" module="jmxri"/>
+        <exclude org="com.sun.jdmk" module="jmxtools"/>
+        <exclude org="javax.jms" module="jms"/>
       </dependencies>,
 
     scalacOptions ++= Seq("-encoding", "utf8"),
@@ -65,9 +72,8 @@ object G2Server extends Build {
       if (v.trim.endsWith("SNAPSHOT"))
         Some("snapshots" at nexus + "content/repositories/snapshots")
       else
-        Some("releases"  at nexus + "service/local/staging/deploy/maven2")
-    }
-  )
+        Some("releases" at nexus + "service/local/staging/deploy/maven2")
+    })
 
   lazy val g2Server = Project(
     id = "g2-scala-server",
@@ -75,37 +81,31 @@ object G2Server extends Build {
     settings = Project.defaultSettings ++
       sharedSettings ++
       Unidoc.settings ++
-      SbtStartScript.startScriptForClassesSettings
-  ).settings(
-    name := "g2-scala-server",
-    autoScalaLibrary := false,
-    libraryDependencies ++= Seq(
-      gdata("youtube"),
-      gdata("youtube-meta")
-  ))
+      SbtStartScript.startScriptForClassesSettings).settings(
+      name := "g2-scala-server",
+      autoScalaLibrary := false,
+      libraryDependencies ++= Seq(
+        gdata("youtube"),
+        gdata("youtube-meta")))
 
   lazy val g2ServerDoc = Project(
     id = "g2-scala-doc",
     base = file("doc"),
     settings =
       Project.defaultSettings ++
-      sharedSettings ++
-      site.settings ++
-      site.sphinxSupport() ++
-      Seq(
-        scalacOptions in doc <++= (version).map(v => Seq("-doc-title", "Twitter-server", "-doc-version", v)),
-        includeFilter in Sphinx := ("*.html" | "*.png" | "*.js" | "*.css" | "*.gif" | "*.txt")
-      )
-    ).configs(DocTest).settings(
-      inConfig(DocTest)(Defaults.testSettings): _*
-    ).settings(
-      unmanagedSourceDirectories in DocTest <+= baseDirectory { _ / "src/sphinx/code" },
+        sharedSettings ++
+        site.settings ++
+        site.sphinxSupport() ++
+        Seq(
+          scalacOptions in doc <++= (version).map(v => Seq("-doc-title", "Twitter-server", "-doc-version", v)),
+          includeFilter in Sphinx := ("*.html" | "*.png" | "*.js" | "*.css" | "*.gif" | "*.txt"))).configs(DocTest).settings(
+      inConfig(DocTest)(Defaults.testSettings): _*).settings(
+        unmanagedSourceDirectories in DocTest <+= baseDirectory { _ / "src/sphinx/code" },
 
-      // Make the "test" command run both, test and doctest:test
-      test <<= Seq(test in Test, test in DocTest).dependOn
-    ).dependsOn(g2Server)
+        // Make the "test" command run both, test and doctest:test
+        test <<= Seq(test in Test, test in DocTest).dependOn).dependsOn(g2Server)
 
   /* Test Configuration for running tests on doc sources */
-  lazy val DocTest = config("testdoc") extend(Test)
+  lazy val DocTest = config("testdoc") extend (Test)
 }
 
