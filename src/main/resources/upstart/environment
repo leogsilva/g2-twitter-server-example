@@ -1,0 +1,9 @@
+#!/bin/bash
+
+: ${SERVICE_HOME?"SERVICE_HOME should be defined"}
+: ${JAVA_HOME?"JAVA_HOME must be defined"}
+
+
+export SERVICE_PORT=:8888
+export ZOO_PORT=%ZOO_PORT%
+export ZOO_HOST=%ZOO_HOST%

@@ -6,14 +6,10 @@ import com.typesafe.sbt.site.SphinxSupport.Sphinx
 import com.typesafe.sbt.SbtStartScript
 import com.twitter.scrooge.ScroogeSBT
 
-object G2Server extends Build {
-  val gdataVersion = "1.47.1"
-
-  def gdata(which: String) = "com.google.gdata.gdata-java-client" % ("gdata-" + which + "-2.0") % gdataVersion
-
+object SoundwhereApi extends Build {
   val sharedSettings = Seq(
     version := "0.0.1",
-    organization := "com.g2",
+    organization := "com.soundwhere",
     crossScalaVersions := Seq("2.9.2"),
 
     libraryDependencies ++= Seq(
@@ -68,23 +64,20 @@ object G2Server extends Build {
         Some("releases" at nexus + "service/local/staging/deploy/maven2")
     })
 
-  lazy val g2Server = Project(
-    id = "g2-scala-server",
+  lazy val soundwhereApi = Project(
+    id = "soundwhere-api",
     base = file("."),
     settings = Project.defaultSettings ++
       sharedSettings ++
       Unidoc.settings ++
       ScroogeSBT.newSettings ++
       SbtStartScript.startScriptForClassesSettings).settings(
-      name := "g2-scala-server",
+      name := "soundwhere-api",
       autoScalaLibrary := false,
-      unmanagedSourceDirectories in Compile <+= baseDirectory(_  / "target" / "scala-2.9.2" / "src_managed" / "main" ),
-      libraryDependencies ++= Seq(
-        gdata("youtube"),
-        gdata("youtube-meta")))
+      unmanagedSourceDirectories in Compile <+= baseDirectory(_  / "target" / "scala-2.9.2" / "src_managed" / "main" ))
 
-  lazy val g2ServerDoc = Project(
-    id = "g2-scala-doc",
+  lazy val soundwhereApiDoc = Project(
+    id = "soundwhere-api-doc",
     base = file("doc"),
     settings =
       Project.defaultSettings ++
@@ -98,7 +91,7 @@ object G2Server extends Build {
         unmanagedSourceDirectories in DocTest <+= baseDirectory { _ / "src/sphinx/code" },
 
         // Make the "test" command run both, test and doctest:test
-        test <<= Seq(test in Test, test in DocTest).dependOn).dependsOn(g2Server)
+        test <<= Seq(test in Test, test in DocTest).dependOn).dependsOn(soundwhereApi)
 
   /* Test Configuration for running tests on doc sources */
   lazy val DocTest = config("testdoc") extend (Test)
