@@ -78,6 +78,7 @@ object G2Server extends Build {
       SbtStartScript.startScriptForClassesSettings).settings(
       name := "g2-scala-server",
       autoScalaLibrary := false,
+      unmanagedSourceDirectories in Compile <+= baseDirectory(_  / "target" / "scala-2.9.2" / "src_managed" / "main" ),
       libraryDependencies ++= Seq(
         gdata("youtube"),
         gdata("youtube-meta")))
